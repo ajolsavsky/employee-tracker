@@ -1,5 +1,19 @@
 const connection = require('./config/connection');
 const inquirer = require('inquirer');
+const cTable = require('console.table');
+
+connection.connect(err => {
+    if (err) throw err;
+    console.log('✅ You are now connected');
+    console.log(`
+    -------------------------------
+    
+    👨‍💼 EMPLOYEE TRACKER DATABASE 👩‍💼
+    
+    -------------------------------
+    `)
+    init();
+})
 
 const questionsLaunch = [
     {
@@ -11,19 +25,13 @@ const questionsLaunch = [
 ]
 
 const init = async () => {
-    console.log(`
-    -------------------------------
-    Welcome to employee tracker!👨‍💼👩‍💼
-    -------------------------------
-    `)
-
     const data = await inquirer.prompt(questionsLaunch)
         if (data.launchAnswer === 'View all departments') {
             console.log('You selected view all departments');
         } else if (data.launchAnswer === 'View all roles') {
             console.log('You selected view all roles');
         } else if (data.launchAnswer === 'View all employees') {
-            console.log('You selected view all employees')
+            showEmployees();
         } else if (data.launchAnswer === 'Add a department') {
             console.log('You selected add a department')
         } else if (data.launchAnswer === 'Add a role') {
@@ -43,4 +51,27 @@ const viewAllDepts = () => {
     )
 }
 
-init();
+const showEmployees = () => {
+    console.log(`
+    
+    📚 ALL EMPLOYEES
+
+    `);
+    const sql = `
+    SELECT employee.id AS 'ID', 
+        employee.first_name AS 'First Name', 
+        employee.last_name AS 'Last Name', 
+        role.title AS 'Role', 
+        department.department_name AS 'Department',
+        role.salary AS 'Salary',
+        CONCAT (manager.first_name, " ", manager.last_name) AS 'Manager'
+    FROM employee 
+        LEFT JOIN role ON (employee.role_id = role.id)
+        LEFT JOIN department ON (department.id = role.department_id)
+        LEFT JOIN employee manager ON employee.manager_id = manager.id`;
+    connection.query(sql, (err, rows) => {
+        if (err) throw (err);
+        console.table(rows);
+        init();
+    });
+};
