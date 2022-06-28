@@ -22,7 +22,7 @@ const questionsLaunch = [
         type: 'list',
         message: 'Please select from the following options:',
         name: 'launchAnswer',
-        choices: ['View all departments', 'View all roles', 'View all employees', 'Add a department', 'Add a role', 'Add an employee', 'Update an employee role']
+        choices: ['View all departments', 'View all roles', 'View all employees', 'Add a department', 'Add a role', 'Add an employee', 'Update an employee role', 'Exit database']
     }
 ]
 
@@ -66,11 +66,16 @@ const init = async () => {
         } else if (data.launchAnswer === 'Add a role') {
             addRole();
         } else if (data.launchAnswer === 'Add an employee') {
-            console.log('You selected add an employee')
+            addEmployee();
         } else if (data.launchAnswer === 'Update an employee role') {
-            console.log('You selected update an employee role')
-        } else {
-            console.log("Please select one of the options")
+            updateEmployee();
+        } else if (data.launchAnswer === 'Exit database'){
+            console.log(`
+            
+            Goodbye! 👋
+
+            `)
+            connection.end()
         }
 }
 
@@ -200,7 +205,7 @@ const addRole = () => {
             INSERT INTO role (title, salary, department_id) VALUES ('${title}','${salary}', ${deptName})
             `;
             
-            connection.query(sqlA, (err, rows) => {
+            connection.query(sqlA, (err) => {
                 if (err)
                     throw (err);
                 console.log(`
@@ -212,4 +217,14 @@ const addRole = () => {
         });
     });
 });
+}
+
+const addEmployee = () => {
+    console.log('You selected add an employee')
+    init();
+}
+
+const updateEmployee = () => {
+    console.log('You selected update an employee')
+    init();
 }
