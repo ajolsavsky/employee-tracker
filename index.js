@@ -27,9 +27,9 @@ const questionsLaunch = [
 const init = async () => {
     const data = await inquirer.prompt(questionsLaunch)
         if (data.launchAnswer === 'View all departments') {
-            console.log('You selected view all departments');
+            showDepts();
         } else if (data.launchAnswer === 'View all roles') {
-            console.log('You selected view all roles');
+            showRoles();
         } else if (data.launchAnswer === 'View all employees') {
             showEmployees();
         } else if (data.launchAnswer === 'Add a department') {
@@ -45,16 +45,51 @@ const init = async () => {
         }
 }
 
-const viewAllDepts = () => {
-    connection.query(
-        ""
-    )
+const showDepts = () => {
+    console.log(`
+    
+    🏢 VIEWING ALL DEPARTMENTS
+
+    `);
+    
+    const sql = `
+    SELECT department.id AS 'ID',
+        department.department_name AS 'Department'
+        FROM department;
+    `
+    connection.query(sql, (err, rows) => {
+        if (err) throw (err);
+        console.table(rows);
+        init();
+    });
+};
+
+const showRoles = () => {
+    console.log(`
+    
+    📋 VIEWING ALL ROLES
+
+    `);
+    const sql = `
+    SELECT role.id AS 'ID',
+        role.title AS 'Title',
+        department.department_name AS 'Department',
+        role.salary AS 'Salary'
+    FROM role
+        LEFT JOIN department 
+        ON (department.id = role.department_id)
+    `
+    connection.query(sql, (err, rows) => {
+        if (err) throw (err);
+        console.table(rows);
+        init();
+    });
 }
 
 const showEmployees = () => {
     console.log(`
     
-    📚 ALL EMPLOYEES
+    🧑‍💼 VIEWING ALL EMPLOYEES
 
     `);
     const sql = `
