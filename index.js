@@ -2,6 +2,8 @@ const connection = require('./config/connection');
 const inquirer = require('inquirer');
 const cTable = require('console.table');
 
+const Department = require('./lib/department');
+
 connection.connect(err => {
     if (err) throw err;
     console.log('✅ You are now connected');
@@ -24,6 +26,14 @@ const questionsLaunch = [
     }
 ]
 
+const deptQuestion = [
+    {
+        type: 'input',
+        message: 'Enter the new department name',
+        name: 'deptName'
+    }
+]
+
 const init = async () => {
     const data = await inquirer.prompt(questionsLaunch)
         if (data.launchAnswer === 'View all departments') {
@@ -33,7 +43,7 @@ const init = async () => {
         } else if (data.launchAnswer === 'View all employees') {
             showEmployees();
         } else if (data.launchAnswer === 'Add a department') {
-            console.log('You selected add a department')
+            addDept();
         } else if (data.launchAnswer === 'Add a role') {
             console.log('You selected add a role')
         } else if (data.launchAnswer === 'Add an employee') {
@@ -110,3 +120,27 @@ const showEmployees = () => {
         init();
     });
 };
+
+const addDept = async () => {
+    console.log(`
+    
+    🧑‍💼 ADD A DEPARTMENT
+
+    `);
+    const data = await inquirer.prompt(deptQuestion);
+    const { deptName } = data;
+    const sql = `
+        INSERT INTO department (department_name) values ('${deptName}');
+        `;
+    connection.query(sql, (err, rows) => {
+        if (err)
+            throw (err);
+        console.log(`
+        
+    ${deptName} department has been added! ✅
+        
+        `);
+        init();
+    });
+
+}

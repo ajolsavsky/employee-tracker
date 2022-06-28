@@ -20,9 +20,15 @@
 
 -- ALL ROLES QUERY
 
-SELECT role.id AS 'ID',
-role.title AS 'Title',
-department.department_name AS 'Department',
-role.salary AS 'Salary'
-FROM role
-    LEFT JOIN department ON (department.id = role.department_id)
+-- SELECT role.id AS 'ID',
+-- role.title AS 'Title',
+-- department.department_name AS 'Department',
+-- role.salary AS 'Salary'
+-- FROM role
+--     LEFT JOIN department ON (department.id = role.department_id)
+
+
+-- INSERT INTO department (department_name) values ('Playgroup');
+
+-- DELETE FROM department WHERE id = 7;
+
