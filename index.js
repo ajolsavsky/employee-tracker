@@ -34,6 +34,25 @@ const deptQuestion = [
     }
 ]
 
+// const roleQuestions = [
+//     {
+//         type: 'input',
+//         message: 'What is the name of the role?',
+//         name: 'title'
+//     },
+//     {
+//         type: 'input',
+//         message: 'What is the salary of the role?',
+//         name: 'salary'
+//     },
+//     {
+//         type: 'list',
+//         message: 'Which department does the role belong to?',
+//         choices: dept,
+//         name: 'deptName'
+//     }
+// ]
+
 const init = async () => {
     const data = await inquirer.prompt(questionsLaunch)
         if (data.launchAnswer === 'View all departments') {
@@ -45,7 +64,7 @@ const init = async () => {
         } else if (data.launchAnswer === 'Add a department') {
             addDept();
         } else if (data.launchAnswer === 'Add a role') {
-            console.log('You selected add a role')
+            addRole();
         } else if (data.launchAnswer === 'Add an employee') {
             console.log('You selected add an employee')
         } else if (data.launchAnswer === 'Update an employee role') {
@@ -143,4 +162,54 @@ const addDept = async () => {
         init();
     });
 
+}
+
+const addRole = () => {
+    console.log(`
+    
+    📋 ADD A ROLE
+
+    `)
+    const sql = `SELECT * FROM department`;
+    
+    connection.query(sql, (err, data) => {
+        if (err) throw err;
+        const dept = data.map(({ id, department_name }) => ({ name: department_name, value: id }));
+
+        return inquirer.prompt([
+            {
+                type: 'input',
+                message: 'What is the name of the role?',
+                name: 'title'
+            },
+            {
+                type: 'input',
+                message: 'What is the salary of the role?',
+                name: 'salary'
+            },
+            {
+                type: 'list',
+                message: 'Which department does the role belong to?',
+                choices: dept,
+                name: 'deptName'
+            }
+        ])
+        .then((answers) => {
+            const { title, salary, deptName } = answers;
+            const sqlA = `
+            INSERT INTO role (title, salary, department_id) VALUES ('${title}','${salary}', ${deptName})
+            `;
+            
+            connection.query(sqlA, (err, rows) => {
+                if (err)
+                    throw (err);
+                console.log(`
+                
+    ${title} has been added! ✅
+                
+                `);
+                init()
+        });
+    });
+});
 }
