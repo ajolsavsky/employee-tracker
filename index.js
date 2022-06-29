@@ -3,6 +3,7 @@ const inquirer = require('inquirer');
 const cTable = require('console.table');
 
 const Department = require('./lib/department');
+const { listenerCount } = require('process');
 
 connection.connect(err => {
     if (err) throw err;
@@ -277,6 +278,59 @@ const addEmployee = () => {
 }
 
 const updateEmployee = () => {
-    console.log('You selected update an employee')
-    init();
+    const sql = `SELECT * FROM employee`;
+
+    connection.query(sql, (err, data) => {
+        if (err) throw err;
+
+        const employees = data.map(({ id, first_name, last_name}) => ({ name: first_name + " " + last_name, value: id }));
+
+        inquirer.prompt([
+            {
+                type: 'list',
+                message: 'Which employee would you like to update?',
+                choices: employees,
+                name: 'name'
+            }
+        ])
+        .then(employeeChoice => {
+            const employee = employeeChoice.name;
+            const params = [];
+            params.push(employee);
+
+            const roleSql = `SELECT * FROM role`;
+
+            connection.query(roleSql, (err, data) => {
+                if (err) throw (err);
+                const roles = data.map(( { id, title }) => ({ name: title, value: id }));
+
+                inquirer.prompt([
+                    {
+                        type: 'list',
+                        message: 'What role should this employee have?',
+                        choices: roles,
+                        name: 'role'
+                    }
+                ])
+                .then(roleChoice => {
+                    const role = roleChoice.role;
+                    params.push(role);
+
+                    console.log(params);
+
+                    const reversedParams = params.reverse();
+
+                    console.log(reversedParams);
+
+                    const sql = `UPDATE employee SET role_id = ? WHERE id = ?`
+
+                    connection.query(sql, reversedParams, (err, result) => {
+                        if (err) throw err;
+                        console.log("ROLE has been updated!");
+                        init();
+                    })
+                })
+            })
+        })
+    })
 }
