@@ -2,9 +2,6 @@ const connection = require('./config/connection');
 const inquirer = require('inquirer');
 const cTable = require('console.table');
 
-const Department = require('./lib/department');
-const { listenerCount } = require('process');
-
 connection.connect(err => {
     if (err) throw err;
     console.log('✅ You are now connected');
@@ -235,10 +232,7 @@ const addEmployee = () => {
             }
         ])
         .then((answers) => {
-            console.log(answers);
-            // const { firstName, lastName, roleName } = answers;
             employeeArr.push(answers.firstName, answers.lastName, answers.roleName);
-            console.log(employeeArr);
 
             const managerSql = `SELECT * FROM employee`;
 
@@ -257,7 +251,6 @@ const addEmployee = () => {
                 .then(managerChoice => {
                     const manager = managerChoice.manager;
                     employeeArr.push(manager);
-                    console.log(employeeArr);
 
                     const sql = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`;
 
@@ -278,6 +271,12 @@ const addEmployee = () => {
 }
 
 const updateEmployee = () => {
+    console.log(`
+    
+    📋 UPDATE EMPLOYEE ROLE
+
+    `);
+    
     const sql = `SELECT * FROM employee`;
 
     connection.query(sql, (err, data) => {
@@ -316,17 +315,18 @@ const updateEmployee = () => {
                     const role = roleChoice.role;
                     params.push(role);
 
-                    console.log(params);
-
                     const reversedParams = params.reverse();
-
-                    console.log(reversedParams);
 
                     const sql = `UPDATE employee SET role_id = ? WHERE id = ?`
 
                     connection.query(sql, reversedParams, (err, result) => {
                         if (err) throw err;
-                        console.log("ROLE has been updated!");
+                        console.log(`
+                        
+    Employee role has been updated! ✅
+                    
+                                            `);
+
                         init();
                     })
                 })
