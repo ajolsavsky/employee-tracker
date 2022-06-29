@@ -34,25 +34,6 @@ const deptQuestion = [
     }
 ]
 
-// const roleQuestions = [
-//     {
-//         type: 'input',
-//         message: 'What is the name of the role?',
-//         name: 'title'
-//     },
-//     {
-//         type: 'input',
-//         message: 'What is the salary of the role?',
-//         name: 'salary'
-//     },
-//     {
-//         type: 'list',
-//         message: 'Which department does the role belong to?',
-//         choices: dept,
-//         name: 'deptName'
-//     }
-// ]
-
 const init = async () => {
     const data = await inquirer.prompt(questionsLaunch)
         if (data.launchAnswer === 'View all departments') {
@@ -148,7 +129,7 @@ const showEmployees = () => {
 const addDept = async () => {
     console.log(`
     
-    🧑‍💼 ADD A DEPARTMENT
+    🏢 ADD A DEPARTMENT
 
     `);
     const data = await inquirer.prompt(deptQuestion);
@@ -220,8 +201,79 @@ const addRole = () => {
 }
 
 const addEmployee = () => {
-    console.log('You selected add an employee')
-    init();
+    console.log(`
+    
+    🧑‍💼 ADD AN EMPLOYEE
+
+    `)
+
+    const sqlRole = `SELECT * FROM role`;
+    
+    connection.query(sqlRole, (err, data) => {
+        if (err) throw err;
+        const role = data.map(({ id, title, salary, department_id  }) => ({ name: title, salary: salary, department: department_id, value: id }));
+
+        const employeeArr = [];
+
+        return inquirer.prompt([
+            {
+                type: 'input',
+                message: "What is the employee's first name?",
+                name: 'firstName'
+            },
+            {
+                type: 'input',
+                message: "What is the employee's last name?",
+                name: 'lastName'
+            },
+            {
+                type: 'list',
+                message: "What is the employee's role?",
+                choices: role,
+                name: 'roleName'
+            }
+        ])
+        .then((answers) => {
+            console.log(answers);
+            // const { firstName, lastName, roleName } = answers;
+            employeeArr.push(answers.firstName, answers.lastName, answers.roleName);
+            console.log(employeeArr);
+
+            const managerSql = `SELECT * FROM employee`;
+
+            connection.query(managerSql, (err, data) => {
+                if (err) throw err;
+                const managers = data.map(({ id, first_name, last_name}) => ({ name: first_name + " " + last_name, value: id}));
+
+                inquirer.prompt([
+                    {
+                        type: 'list',
+                        message: "Who is the employee's manager?",
+                        choices: managers,
+                        name: 'manager'
+                    }
+                ])
+                .then(managerChoice => {
+                    const manager = managerChoice.manager;
+                    employeeArr.push(manager);
+                    console.log(employeeArr);
+
+                    const sql = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`;
+
+                    connection.query(sql, employeeArr, (err, result) => {
+                        if (err) throw err;
+                        console.log(`
+                        
+    Employee has been added! ✅
+
+                        `);
+                        init();
+                    })
+
+                })
+            })
+        });
+    });
 }
 
 const updateEmployee = () => {

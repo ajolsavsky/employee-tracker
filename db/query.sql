@@ -32,3 +32,6 @@
 
 -- DELETE FROM department WHERE id = 7;
 
+SELECT role.title AS 'Role'
+FROM role 
+    JOIN department ON role.department_id = department.id;
